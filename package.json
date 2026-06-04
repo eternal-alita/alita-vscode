@@ -1,0 +1,153 @@
+{
+  "name": "alita-vscode",
+  "displayName": "Alita — AI Coding Agent",
+  "description": "A VS Code native AI coding agent powered by any OpenAI-compatible API gateway. Agent mode with file read/edit, terminal, and search tools.",
+  "version": "0.1.0",
+  "publisher": "alita",
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "Chat",
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguageModelChatProvider:alita"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languageModelChatProviders": [
+      {
+        "id": "alita",
+        "label": "Alita",
+        "vendor": "alita",
+        "model": "deepseek-v4-flash",
+        "since": "1.99.0",
+        "icon": {
+          "dark": "./icon-dark.svg",
+          "light": "./icon-light.svg"
+        }
+      }
+    ],
+    "chatParticipants": [
+      {
+        "id": "alita.participant",
+        "name": "alita",
+        "fullName": "Alita",
+        "description": "AI coding agent with file, terminal, and search tools.",
+        "isSticky": true,
+        "disambiguation": [
+          {
+            "category": "ask",
+            "description": "Alita chat"
+          },
+          {
+            "category": "agent",
+            "description": "Alita full agent mode"
+          }
+        ]
+      }
+    ],
+    "languageModelTools": [
+      {
+        "name": "alita_readFiles",
+        "displayName": "Read Files",
+        "tags": ["alita"],
+        "toolReferenceName": "readFiles",
+        "canBeReferencedInPrompt": true,
+        "userDescription": "Read file contents from the workspace",
+        "modelDescription": "Read the content of one or more files. Use this when you need to examine code or documentation files in the workspace.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "paths": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Absolute file paths to read"
+            }
+          },
+          "required": ["paths"]
+        }
+      },
+      {
+        "name": "alita_editFile",
+        "displayName": "Edit File",
+        "tags": ["alita"],
+        "toolReferenceName": "editFile",
+        "canBeReferencedInPrompt": true,
+        "userDescription": "Edit a file in the workspace using SEARCH/REPLACE",
+        "modelDescription": "Apply SEARCH/REPLACE edits to files. Use SEARCH/REPLACE blocks to specify changes.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "path": {"type": "string", "description": "File path to edit"},
+            "search": {"type": "string", "description": "Text to find"},
+            "replace": {"type": "string", "description": "Replacement text"}
+          },
+          "required": ["path", "search", "replace"]
+        }
+      },
+      {
+        "name": "alita_terminal",
+        "displayName": "Run Terminal Command",
+        "tags": ["alita"],
+        "toolReferenceName": "terminal",
+        "canBeReferencedInPrompt": true,
+        "userDescription": "Run a shell command in the terminal",
+        "modelDescription": "Execute shell commands. Use for builds, tests, git operations.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "command": {"type": "string", "description": "Shell command to execute"}
+          },
+          "required": ["command"]
+        }
+      },
+      {
+        "name": "alita_searchFiles",
+        "displayName": "Search Files",
+        "tags": ["alita"],
+        "toolReferenceName": "searchFiles",
+        "canBeReferencedInPrompt": true,
+        "userDescription": "Search for files or content in the workspace",
+        "modelDescription": "Search workspace files by content or filename pattern.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "pattern": {"type": "string", "description": "Search pattern"},
+            "target": {"type": "string", "enum": ["content", "files"], "description": "Search inside content or by filename"}
+          },
+          "required": ["pattern"]
+        }
+      }
+    ],
+    "configuration": {
+      "title": "Alita",
+      "properties": {
+        "alita.gatewayUrl": {
+          "type": "string",
+          "default": "http://localhost:8642",
+          "description": "The URL of the OpenAI-compatible API gateway. Also configurable via ALITA_GATEWAY_URL env var."
+        },
+        "alita.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for the gateway. Also configurable via ALITA_API_KEY env var. Leave empty if your gateway doesn't require authentication."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.99.0",
+    "typescript": "^5.7.0",
+    "@vscode/vsce": "^3.0.0"
+  },
+  "dependencies": {}
+}
