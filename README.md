@@ -1,62 +1,62 @@
-# Alita — VS Code Native AI Coding Agent
+# Alita — VS Code 原生 AI 编码助手
 
-**Alita** is a VS Code extension that brings a full-featured AI coding agent directly into your editor, powered by any OpenAI-compatible API gateway (such as [Hermes Gateway](https://hermes-agent.nousresearch.com)).
+**Alita** 是一款 VS Code 扩展，通过任何兼容 OpenAI API 的后端网关（如 [Hermes Gateway](https://hermes-agent.nousresearch.com)）提供完整的 AI 编码助手能力。
 
-Built on VS Code's [Language Model API](https://code.visualstudio.com/api/extension-guides/language-model) (available since VS Code 1.99), Alita provides both **chat** and **agent** modes with native workspace tool integration — no custom UI, no side panels, just pure editor-native AI interaction.
+基于 VS Code 的 [Language Model API](https://code.visualstudio.com/api/extension-guides/language-model)（自 VS Code 1.99 起可用），Alita 同时提供**对话**和**代理**两种模式，原生集成工作区工具——无需自定义 UI、无需侧面板，纯粹的编辑器原生 AI 交互体验。
 
-## Features
+## 功能特性
 
-- **Agent Mode** — Alita can read files, edit code, run terminal commands, and search your workspace, all through native VS Code Chat UX
-- **Ask Mode** — Streaming chat responses from your backend model, integrated into VS Code's Chat view
-- **Tool Orchestration** — Agent mode sends tool definitions to the backend; the backend decides when and how to call them
-- **Zero Custom UI** — No webviews, no custom sidebars — everything runs through VS Code's built-in Chat and Agent experiences
-- **Configurable Backend** — Works with any OpenAI-compatible API endpoint (Hermes Gateway, llama.cpp, vLLM, etc.)
+- **代理模式** — Alita 可以读取文件、编辑代码、执行终端命令、搜索工作区文件，全部通过 VS Code 原生聊天界面完成
+- **对话模式** — 流式对话响应，集成在 VS Code 聊天视图中
+- **工具编排** — 代理模式下将工具定义发送给后端，由后端决定何时调用、如何调用
+- **零自定义 UI** — 无 Webview、无自定义侧边栏，全部基于 VS Code 内置的聊天和代理体验
+- **可配置后端** — 兼容任何 OpenAI 接口的端点（Hermes Gateway、llama.cpp、vLLM 等）
 
-## Architecture Overview
+## 架构概览
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                    VS Code Editor                    │
+│                    VS Code 编辑器                     │
 │  ┌──────────────────────────────────────────────┐   │
-│  │              Chat / Agent View               │   │
+│  │             聊天 / 代理视图                    │   │
 │  └──────────────┬───────────────────────────────┘   │
 │                 │ VS Code Language Model API         │
 │  ┌──────────────▼───────────────────────────────┐   │
-│  │           Alita Extension (this)              │   │
+│  │           Alita 扩展（本插件）                  │   │
 │  │  ┌──────────┐  ┌──────────┐  ┌────────────┐  │   │
-│  │  │ Provider  │  │ Gateway  │  │ Tools (4)  │  │   │
-│  │  │ (Chat)    │  │ Client   │  │ Read/Edit/ │  │   │
-│  │  │           │  │ (HTTP)   │  │ Term/Search│  │   │
+│  │  │ Provider  │  │ Gateway  │  │ 工具(4个)  │  │   │
+│  │  │ (聊天)    │  │ 客户端   │  │ 读/编辑/   │  │   │
+│  │  │           │  │ (HTTP)   │  │ 终端/搜索  │  │   │
 │  │  └──────────┘  └────┬─────┘  └────────────┘  │   │
 │  └─────────────────────┼────────────────────────┘   │
 └────────────────────────┼────────────────────────────┘
-                         │ HTTP (OpenAI-compatible)
+                         │ HTTP（OpenAI 兼容）
 ┌────────────────────────▼───────────────────────────┐
-│           Backend Gateway (Hermes / any)             │
+│           后端网关（Hermes / 任意）                   │
 │  ┌──────────┐ ┌──────────┐ ┌────────────────────┐   │
-│  │ Identity │ │ Memory   │ │ LLM Inference      │   │
-│  │ Injection│ │ Retrieval│ │ (tool calling etc.)│   │
+│  │ 身份注入  │ │ 记忆检索  │ │ LLM 推理          │   │
+│  │          │ │          │ │（工具调用等）        │   │
 │  └──────────┘ └──────────┘ └────────────────────┘   │
 └─────────────────────────────────────────────────────┘
 ```
 
-For a detailed architecture breakdown, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+详细架构说明见 [ARCHITECTURE.md](./ARCHITECTURE.md)。
 
-## Quick Start
+## 快速开始
 
-### Prerequisites
+### 前置依赖
 
-- **VS Code** 1.99 or later
-- A running **OpenAI-compatible API gateway** (see Backend Setup below)
-- **Node.js 22+** and **npm** (if building from source)
+- **VS Code** 1.99 或更高版本
+- 一个正在运行的 **OpenAI 兼容 API 网关**（见后端设置）
+- **Node.js 22+** 和 **npm**（如需从源码构建）
 
-### Installation
+### 安装
 
-1. Download the latest `.vsix` from [Releases](https://github.com/eternal-alita/alita-vscode/releases)
-2. In VS Code, press `Cmd+Shift+P` → `Extensions: Install from VSIX...` → select the file
-3. **Reload Window** — `Cmd+Shift+P` → `Developer: Reload Window`
+1. 从 [Releases](https://github.com/eternal-alita/alita-vscode/releases) 下载最新的 `.vsix`
+2. 在 VS Code 中按 `Cmd+Shift+P` → `Extensions: Install from VSIX...` → 选择文件
+3. **重载窗口** — `Cmd+Shift+P` → `Developer: Reload Window`
 
-Or build from source:
+或者从源码构建：
 
 ```bash
 git clone https://github.com/eternal-alita/alita-vscode.git
@@ -64,83 +64,92 @@ cd alita-vscode
 npm install
 npm run compile
 npx vsce package
-# Install the generated .vsix as above
+# 按上述方式安装生成的 .vsix
 ```
 
-### Configuration
+### 配置
 
-Alita needs to connect to an API gateway. Configure via VS Code settings (`Cmd+,` → search "alita"):
+Alita 需要连接到 API 网关。通过 VS Code 设置配置（`Cmd+,` → 搜索 "alita"）：
 
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `alita.gatewayUrl` | `http://localhost:8642` | Your gateway's OpenAI-compatible endpoint |
-| `alita.apiKey` | `""` | API key (leave empty if not required) |
+| 设置项 | 默认值 | 说明 |
+|--------|--------|------|
+| `alita.gatewayUrl` | `http://localhost:8642` | 网关的 OpenAI 兼容端点 |
+| `alita.apiKey` | `""` | API 密钥（如无需鉴权可留空） |
+| `alita.model` | `gpt-4o` | 发送给后端的模型名称 |
 
-Can also be set via environment variables: `ALITA_GATEWAY_URL` and `ALITA_API_KEY`.
+以上配置也可以通过环境变量设置：
 
-### Usage
+| 设置项 | 环境变量 |
+|--------|---------|
+| `alita.gatewayUrl` | `ALITA_GATEWAY_URL` |
+| `alita.apiKey` | `ALITA_API_KEY` |
+| `alita.model` | `ALITA_MODEL` |
 
-1. Open VS Code Chat: `Cmd+Shift+I`
-2. Select **Alita** as the chat model from the dropdown
-3. Choose **Ask** mode for chat, or **Agent** mode for tool access
-4. Start typing your requests
+配置读取优先级：**VS Code 设置 > 环境变量 > 默认值**。
 
-**Ask mode** — streaming text responses from your backend, no tool access.
+### 使用
 
-**Agent mode** — Alita can use these tools:
+1. 打开 VS Code 聊天：`Cmd+Shift+I`
+2. 从模型下拉菜单中选择 **Alita**
+3. 选择 **对话** 模式（纯聊天）或 **代理** 模式（使用工具）
+4. 输入你的需求
 
-| Tool | Description |
-|------|-------------|
-| `alita_readFiles` | Read one or more workspace files |
-| `alita_editFile` | Edit files using SEARCH/REPLACE blocks |
-| `alita_terminal` | Execute shell commands |
-| `alita_searchFiles` | Search file contents or find files by name |
+**对话模式** — 流式文本响应，无工具访问权限。
 
-### Backend Setup
+**代理模式** — Alita 可使用以下工具：
 
-Alita requires a running OpenAI-compatible API gateway. Recommended options:
+| 工具 | 说明 |
+|------|------|
+| `alita_readFiles` | 读取一个或多个工作区文件 |
+| `alita_editFile` | 使用 SEARCH/REPLACE 编辑文件 |
+| `alita_terminal` | 执行 Shell 命令 |
+| `alita_searchFiles` | 搜索文件内容或按文件名查找 |
 
-- **[Hermes Gateway](https://hermes-agent.nousresearch.com)** — Full-featured agent framework with identity injection, memory retrieval, and tool orchestration
-- **llama.cpp** — Lightweight local inference server
-- **vLLM** — Production-grade inference serving
-- **Any OpenAI-compatible proxy** — works with any endpoint serving the `/v1/chat/completions` API
+### 后端设置
 
-## Project Structure
+Alita 需要一个正在运行的 OpenAI 兼容 API 网关。推荐选项：
+
+- **[Hermes Gateway](https://hermes-agent.nousresearch.com)** — 功能完善的 Agent 框架，支持身份注入、记忆检索和工具编排
+- **llama.cpp** — 轻量级本地推理服务器
+- **vLLM** — 生产级推理服务
+- **任意 OpenAI 兼容代理** — 只要提供 `/v1/chat/completions` 端点即可
+
+## 项目结构
 
 ```
 alita-vscode/
 ├── src/
-│   ├── extension.ts      # VS Code extension entry point
-│   ├── gateway.ts        # HTTP client for the backend API
-│   ├── provider.ts       # VS Code LanguageModelChatProvider implementation
-│   └── tools.ts          # Tool registrations (read, edit, terminal, search)
-├── icon-dark.svg         # Dark theme icon
-├── icon-light.svg        # Light theme icon
-├── package.json          # Extension manifest & configuration
-├── tsconfig.json         # TypeScript configuration
-└── .vscodeignore         # Build exclusions
+│   ├── extension.ts      # VS Code 扩展入口
+│   ├── gateway.ts        # 后端 API HTTP 客户端
+│   ├── provider.ts       # VS Code LanguageModelChatProvider 实现
+│   └── tools.ts          # 工具注册（读、编辑、终端、搜索）
+├── icon-dark.svg         # 暗色主题图标
+├── icon-light.svg        # 亮色主题图标
+├── package.json          # 扩展清单与配置声明
+├── tsconfig.json         # TypeScript 配置
+└── .vscodeignore         # 构建排除规则
 ```
 
-## Development
+## 开发
 
 ```bash
 npm install
 npm run compile     # TypeScript → JavaScript
-npm run watch       # Watch mode for iterative development
-npm run package     # Build .vsix for distribution
+npm run watch       # 监听模式，迭代开发
+npm run package     # 构建 .vsix 用于分发
 ```
 
-## Security
+## 安全
 
-- **API keys are never hardcoded** — configure via VS Code settings or environment variables
-- **No telemetry** — Alita does not collect usage data
-- **No external network calls** — all traffic goes to your configured gateway URL
-- **Works fully offline** — if your gateway runs locally
+- **API 密钥不硬编码** — 通过 VS Code 设置或环境变量配置
+- **无遥测** — Alita 不收集任何使用数据
+- **无外部网络** — 所有流量发往你配置的网关地址
+- **完全离线** — 如果你的网关运行在本地
 
-## License
+## 许可证
 
-MIT License — see [LICENSE](./LICENSE).
+MIT 许可证 — 见 [LICENSE](./LICENSE)。
 
 ---
 
-Built with vscode-language-model-api. Not affiliated with VS Code or Microsoft.
+基于 vscode-language-model-api 构建。与 VS Code 或 Microsoft 无关。
