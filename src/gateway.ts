@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 /**
- * Default Gateway URL — the Hermes Gateway default.
+ * Default Gateway URL.
  * Override via VS Code setting `alita.gatewayUrl` or env variable `ALITA_GATEWAY_URL`.
  */
 const DEFAULT_GATEWAY_URL = 'http://localhost:8642';

@@ -21,7 +21,7 @@
         "id": "alita",
         "label": "Alita",
         "vendor": "alita",
-        "model": "deepseek-v4-flash",
+        "model": "alita",
         "since": "1.99.0",
         "icon": {
           "dark": "./icon-dark.svg",
@@ -133,6 +133,11 @@
           "type": "string",
           "default": "",
           "description": "API key for the gateway. Also configurable via ALITA_API_KEY env var. Leave empty if your gateway doesn't require authentication."
+        },
+        "alita.model": {
+          "type": "string",
+          "default": "gpt-4o",
+          "description": "The backend model name sent to the OpenAI-compatible API. Also configurable via ALITA_MODEL env var."
         }
       }
     }

@@ -16,10 +16,12 @@ You interact with the editor through the VS Code Language Model API:
 - alita_terminal — run shell commands
 - alita_searchFiles — search files by content or name`;
 
+const BACKEND_MODEL_DEFAULT = 'gpt-4o';
+
 const ALITA_MODEL_INFO: vscode.LanguageModelChatInformation = {
   id: 'alita',
   name: 'Alita',
-  family: 'deepseek-v4-flash',
+  family: 'openai-compatible',
   version: '0.1.0',
   maxInputTokens: 128000,
   maxOutputTokens: 8192,
@@ -32,6 +34,16 @@ export class AlitaChatProvider implements vscode.LanguageModelChatProvider<vscod
   private _gateway = new GatewayClient();
 
   onDidChangeLanguageModelChatInformation?: vscode.Event<void>;
+
+  /**
+   * Resolve the backend model name.
+   * Priority: VS Code setting `alita.model` → env `ALITA_MODEL` → default.
+   */
+  private _getBackendModel(): string {
+    return vscode.workspace.getConfiguration('alita').get<string>('model')
+      ?? process.env.ALITA_MODEL
+      ?? BACKEND_MODEL_DEFAULT;
+  }
 
   provideLanguageModelChatInformation(
     _options: vscode.PrepareLanguageModelChatModelOptions,
@@ -51,9 +63,9 @@ export class AlitaChatProvider implements vscode.LanguageModelChatProvider<vscod
     const hasTools = options.tools && options.tools.length > 0;
 
     if (hasTools) {
-      await this._handleToolCalling(model, gatewayMessages, options, progress, token);
+      await this._handleToolCalling(gatewayMessages, options, progress, token);
     } else {
-      await this._handleStreaming(model, gatewayMessages, progress, token);
+      await this._handleStreaming(gatewayMessages, progress, token);
     }
   }
 
@@ -61,7 +73,6 @@ export class AlitaChatProvider implements vscode.LanguageModelChatProvider<vscod
    * Agent mode: non-streaming with tool definitions, handles tool calls.
    */
   private async _handleToolCalling(
-    model: vscode.LanguageModelChatInformation,
     messages: GatewayMessage[],
     options: vscode.ProvideLanguageModelChatResponseOptions,
     progress: vscode.Progress<vscode.LanguageModelResponsePart>,
@@ -73,7 +84,7 @@ export class AlitaChatProvider implements vscode.LanguageModelChatProvider<vscod
       : 'auto' as const;
 
     const response = await this._gateway.chatNonStreaming({
-      model: model.id,
+      model: this._getBackendModel(),
       messages,
       stream: false,
       max_tokens: 8192,
@@ -103,13 +114,12 @@ export class AlitaChatProvider implements vscode.LanguageModelChatProvider<vscod
    * Ask mode: streaming text response, no tool definitions.
    */
   private async _handleStreaming(
-    model: vscode.LanguageModelChatInformation,
     messages: GatewayMessage[],
     progress: vscode.Progress<vscode.LanguageModelResponsePart>,
     token: vscode.CancellationToken
   ): Promise<void> {
     const stream = this._gateway.chatStream({
-      model: model.id,
+      model: this._getBackendModel(),
       messages,
       stream: true,
       max_tokens: 8192,
